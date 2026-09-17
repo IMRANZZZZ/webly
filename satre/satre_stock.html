@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STOCK</title>
+<style>
+  :root {
+    --bg: #faf7f5;
+    --card-bg: #ffffff;
+    --text: #2b2320;
+    --text-soft: #6f645d;
+    --accent: #b5765a;
+    --accent-dark: #96593f;
+    --accent-soft: #f3e2d9;
+    --border: #e8ddd5;
+    --green: #4c8c5c;
+    --green-bg: #e7f3e9;
+    --red: #c1503f;
+    --red-bg: #fbeae7;
+    --amber: #b8862c;
+    --amber-bg: #fbf2df;
+    --shadow: 0 2px 10px rgba(60, 40, 25, 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1815;
+      --card-bg: #262019;
+      --text: #f2e9e2;
+      --text-soft: #b8aa9f;
+      --accent: #d99a76;
+      --accent-dark: #e7b092;
+      --accent-soft: #3a2c22;
+      --border: #3a322a;
+      --green: #7fca92;
+      --green-bg: #1f3324;
+      --red: #e28477;
+      --red-bg: #3a2320;
+      --amber: #e0b45c;
+      --amber-bg: #3a2f18;
+      --shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1815;
+    --card-bg: #262019;
+    --text: #f2e9e2;
+    --text-soft: #b8aa9f;
+    --accent: #d99a76;
+    --accent-dark: #e7b092;
+    --accent-soft: #3a2c22;
+    --border: #3a322a;
+    --green: #7fca92;
+    --green-bg: #1f3324;
+    --red: #e28477;
+    --red-bg: #3a2320;
+    --amber: #e0b45c;
+    --amber-bg: #3a2f18;
+    --shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-size: 1.5rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .subtitle { color: var(--text-soft); font-size: 0.9rem; margin-top: 4px; }
+
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .summary-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .summary-card .label { font-size: 0.78rem; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.03em; }
+  .summary-card .value { font-size: 1.6rem; font-weight: 700; margin-top: 4px; }
+  .summary-card.warn .value { color: var(--amber); }
+  .summary-card.danger .value { color: var(--red); }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .card h2 { font-size: 1.05rem; margin: 0 0 14px; }
+
+  form.add-form {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 0.8fr auto;
+    gap: 10px;
+    align-items: end;
+  }
+  @media (max-width: 700px) {
+    form.add-form { grid-template-columns: 1fr 1fr; }
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 0.78rem; color: var(--text-soft); }
+  input, select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 9px;
+    padding: 9px 10px;
+    font-size: 0.92rem;
+    width: 100%;
+  }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 9px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 10px 16px;
+    transition: transform 0.05s ease, opacity 0.15s ease;
+  }
+  button:active { transform: scale(0.97); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-ghost:hover { background: var(--accent-soft); }
+
+  .controls-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .search-box { flex: 1; min-width: 180px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-soft);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td {
+    padding: 10px 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.92rem;
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  .item-name { font-weight: 600; }
+  .item-tags { font-size: 0.78rem; color: var(--text-soft); margin-top: 2px; }
+
+  .qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .qty-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    padding: 0;
+    font-size: 1rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .qty-num { min-width: 32px; text-align: center; font-weight: 700; }
+  .qty-input {
+    width: 56px;
+    padding: 6px 6px;
+    text-align: center;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+  .badge.ok { background: var(--green-bg); color: var(--green); }
+  .badge.low { background: var(--amber-bg); color: var(--amber); }
+  .badge.out { background: var(--red-bg); color: var(--red); }
+
+  .row-actions { display: flex; gap: 6px; }
+  .icon-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 6px 9px;
+    border-radius: 8px;
+  }
+  .icon-btn:hover { background: var(--accent-soft); }
+  .icon-btn.danger:hover { background: var(--red-bg); color: var(--red); }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-soft);
+  }
+
+  .log-list {
+    max-height: 220px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .log-item {
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-time { color: var(--text-soft); font-size: 0.75rem; white-space: nowrap; }
+  .log-plus { color: var(--green); font-weight: 700; }
+  .log-minus { color: var(--red); font-weight: 700; }
+
+  .overflow-scroll { overflow-x: auto; }
+
+  .top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-dark);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 50;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Stock Manager</h1>
+      <div class ="subtitle">
+        ------
+      </div>
+    <div class="top-actions">
+      <button class="btn-ghost" id="exportBtn">Export CSV</button>
+      <button class="btn-ghost" id="resetBtn">Reset all data</button>
+    </div>
+  </header>
+
+  <div class="summary-row" id="summaryRow"></div>
+
+  <div class="card">
+    <h2>Add new item</h2>
+    <form class="add-form" id="addForm">
+      <div class="field">
+        <label for="fName">Name / style</label>
+        <input type="text" id="fName" placeholder="e.g. Chiffon Square" required>
+      </div>
+      <div class="field">
+        <label for="fColor">Color</label>
+        <input type="text" id="fColor" placeholder="e.g. Dusty Rose">
+      </div>
+      <div class="field">
+        <label for="fFabric">Fabric / size</label>
+        <input type="text" id="fFabric" placeholder="e.g. Chiffon, 70x70">
+      </div>
+      <div class="field">
+        <label for="fQty">Start qty</label>
+        <input type="number" id="fQty" min="0" value="0" required>
+      </div>
+      <button type="submit" class="btn-primary">Add item</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="controls-row">
+      <h2 style="margin:0;">Inventory</h2>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search by name, color, or fabric...">
+      </div>
+    </div>
+    <div class="overflow-scroll">
+      <table id="invTable">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Status</th>
+            <th>Quantity</th>
+            <th>Restock / Deplete</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="invBody"></tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      No items yet. Add your first hijab style above to start tracking stock.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="controls-row">
+      <h2 style="margin:0;">Recent activity</h2>
+      <button class="btn-ghost" id="clearLogBtn">Clear log</button>
+    </div>
+    <div class="log-list" id="logList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'hijab_inventory_items_v1';
+  const LOG_KEY = 'hijab_inventory_log_v1';
+  const LOW_STOCK_THRESHOLD = 5;
+
+  let items = [];
+  let log = [];
+
+  function safeGet(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return fallback;
+      return JSON.parse(raw);
+    } catch (e) {
+      console.error('Storage read failed', e);
+      return fallback;
+    }
+  }
+  function safeSet(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {
+      console.error('Storage write failed', e);
+      showToast('Could not save — storage unavailable');
+    }
+  }
+
+  function load() {
+    items = safeGet(STORAGE_KEY, []);
+    log = safeGet(LOG_KEY, []);
+  }
+  function saveItems() { safeSet(STORAGE_KEY, items); }
+  function saveLog() { safeSet(LOG_KEY, log); }
+
+  function uid() {
+    return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+  }
+
+  function addLog(name, delta, resultingQty) {
+    log.unshift({
+      id: uid(),
+      time: new Date().toISOString(),
+      name: name,
+      delta: delta,
+      resultingQty: resultingQty
+    });
+    log = log.slice(0, 100);
+    saveLog();
+  }
+
+  function formatTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' · ' +
+      d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function statusFor(qty) {
+    if (qty <= 0) return { label: 'Out of stock', cls: 'out' };
+    if (qty <= LOW_STOCK_THRESHOLD) return { label: 'Low stock', cls: 'low' };
+    return { label: 'In stock', cls: 'ok' };
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  function renderSummary() {
+    const total = items.reduce((s, i) => s + i.qty, 0);
+    const lowCount = items.filter(i => i.qty > 0 && i.qty <= LOW_STOCK_THRESHOLD).length;
+    const outCount = items.filter(i => i.qty <= 0).length;
+    const el = document.getElementById('summaryRow');
+    el.innerHTML = `
+      <div class="summary-card">
+        <div class="label">Total items tracked</div>
+        <div class="value">${items.length}</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Total pieces in stock</div>
+        <div class="value">${total}</div>
+      </div>
+      <div class="summary-card warn">
+        <div class="label">Low stock</div>
+        <div class="value">${lowCount}</div>
+      </div>
+      <div class="summary-card danger">
+        <div class="label">Out of stock</div>
+        <div class="value">${outCount}</div>
+      </div>
+    `;
+  }
+
+  function renderTable() {
+    const body = document.getElementById('invBody');
+    const empty = document.getElementById('emptyState');
+    const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+
+    const filtered = items.filter(i => {
+      if (!query) return true;
+      return (i.name + ' ' + i.color + ' ' + i.fabric).toLowerCase().includes(query);
+    });
+
+    if (items.length === 0) {
+      body.innerHTML = '';
+      empty.style.display = 'block';
+      empty.textContent = 'No items yet. Add your first hijab style above to start tracking stock.';
+      return;
+    }
+    if (filtered.length === 0) {
+      body.innerHTML = '';
+      empty.style.display = 'block';
+      empty.textContent = 'No items match your search.';
+      return;
+    }
+    empty.style.display = 'none';
+
+    body.innerHTML = filtered.map(item => {
+      const st = statusFor(item.qty);
+      const tagBits = [item.color, item.fabric].filter(Boolean).join(' · ');
+      return `
+        <tr data-id="${item.id}">
+          <td>
+            <div class="item-name">${escapeHtml(item.name)}</div>
+            ${tagBits ? `<div class="item-tags">${escapeHtml(tagBits)}</div>` : ''}
+          </td>
+          <td><span class="badge ${st.cls}">${st.label}</span></td>
+          <td>
+            <div class="qty-controls">
+              <button class="qty-btn btn-ghost" data-action="dec">−</button>
+              <span class="qty-num">${item.qty}</span>
+              <button class="qty-btn btn-ghost" data-action="inc">+</button>
+            </div>
+          </td>
+          <td>
+            <div class="qty-controls">
+              <input type="number" class="qty-input" min="1" value="10" data-role="bulkAmount">
+              <button class="btn-ghost" data-action="restock" style="padding:6px 10px; font-size:0.8rem;">Restock</button>
+              <button class="btn-ghost" data-action="deplete" style="padding:6px 10px; font-size:0.8rem;">Deplete</button>
+            </div>
+          </td>
+          <td>
+            <div class="row-actions">
+              <button class="icon-btn danger" data-action="delete" title="Delete item">🗑</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderLog() {
+    const list = document.getElementById('logList');
+    if (log.length === 0) {
+      list.innerHTML = '<div class="empty-state" style="padding:10px 0;">No activity yet.</div>';
+      return;
+    }
+    list.innerHTML = log.map(entry => {
+      const sign = entry.delta > 0 ? '+' : '';
+      const cls = entry.delta > 0 ? 'log-plus' : 'log-minus';
+      return `
+        <div class="log-item">
+          <span><strong>${escapeHtml(entry.name)}</strong> <span class="${cls}">${sign}${entry.delta}</span> → ${entry.resultingQty} in stock</span>
+          <span class="log-time">${formatTime(entry.time)}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderAll() {
+    renderSummary();
+    renderTable();
+    renderLog();
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  function changeQty(id, delta) {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    const newQty = Math.max(0, item.qty + delta);
+    const actualDelta = newQty - item.qty;
+    if (actualDelta === 0) return;
+    item.qty = newQty;
+    saveItems();
+    addLog(item.name, actualDelta, item.qty);
+    renderAll();
+  }
+
+  document.getElementById('addForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const name = document.getElementById('fName').value.trim();
+    const color = document.getElementById('fColor').value.trim();
+    const fabric = document.getElementById('fFabric').value.trim();
+    const qty = Math.max(0, parseInt(document.getElementById('fQty').value, 10) || 0);
+    if (!name) return;
+
+    const newItem = { id: uid(), name, color, fabric, qty };
+    items.push(newItem);
+    saveItems();
+    addLog(name, qty, qty);
+    renderAll();
+    showToast(`Added "${name}"`);
+    this.reset();
+    document.getElementById('fQty').value = 0;
+    document.getElementById('fName').focus();
+  });
+
+  document.getElementById('invBody').addEventListener('click', function (e) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const row = e.target.closest('tr');
+    if (!row) return;
+    const id = row.getAttribute('data-id');
+    const action = btn.getAttribute('data-action');
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+
+    if (action === 'inc') changeQty(id, 1);
+    else if (action === 'dec') changeQty(id, -1);
+    else if (action === 'restock' || action === 'deplete') {
+      const input = row.querySelector('[data-role="bulkAmount"]');
+      let amount = parseInt(input.value, 10);
+      if (!amount || amount < 1) amount = 1;
+      changeQty(id, action === 'restock' ? amount : -amount);
+      showToast(action === 'restock'
+        ? `Restocked ${amount} × "${item.name}"`
+        : `Depleted ${amount} × "${item.name}"`);
+    } else if (action === 'delete') {
+      if (confirm(`Remove "${item.name}" from inventory?`)) {
+        items = items.filter(i => i.id !== id);
+        saveItems();
+        addLog(item.name, -item.qty, 0);
+        renderAll();
+        showToast(`Removed "${item.name}"`);
+      }
+    }
+  });
+
+  document.getElementById('searchInput').addEventListener('input', renderTable);
+
+  document.getElementById('exportBtn').addEventListener('click', function () {
+    if (items.length === 0) { showToast('No items to export'); return; }
+    const header = 'Name,Color,Fabric/Size,Quantity,Status\n';
+    const rows = items.map(i => {
+      const st = statusFor(i.qty).label;
+      const esc = v => `"${String(v || '').replace(/"/g, '""')}"`;
+      return [esc(i.name), esc(i.color), esc(i.fabric), i.qty, esc(st)].join(',');
+    }).join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'hijab_inventory.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', function () {
+    if (confirm('This will permanently delete all items and history. Continue?')) {
+      items = [];
+      log = [];
+      saveItems();
+      saveLog();
+      renderAll();
+      showToast('All data cleared');
+    }
+  });
+
+  document.getElementById('clearLogBtn').addEventListener('click', function () {
+    log = [];
+    saveLog();
+    renderLog();
+  });
+
+  load();
+  renderAll();
+})();
+</script>
+</body>
+</html>
